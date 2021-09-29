@@ -15,14 +15,14 @@ SEED = args['screen_name']
 users = defaultdict(lambda: { 'followers': 0 })
 
 for f in glob.glob('twitter-users/*.json'):
-    print "loading " + str(f)
-    data = json.load(file(f))
+    print("loading " + str(f))
+    data = json.load(open(f))
     screen_name = data['screen_name']
     users[screen_name] = { 'followers': data['followers_count'], 'id':data['id'] }
 
 def process_follower_list(screen_name, edges=[], depth=0, max_depth=5):
     f = os.path.join('following', screen_name + '.csv')
-    print "processing " + str(f)
+    print("processing " + str(f))
 
     if not os.path.exists(f):
         return edges
