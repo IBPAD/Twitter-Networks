@@ -27,7 +27,7 @@ def process_follower_list(screen_name, edges=[], depth=0, max_depth=5):
     if not os.path.exists(f):
         return edges
 
-    followers = [line.strip().split('\t') for line in file(f)]
+    followers = [line.strip().split('\t') for line in open(f)]
 
     for follower_data in followers:
         if len(follower_data) < 2:
