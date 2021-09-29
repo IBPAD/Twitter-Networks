@@ -175,7 +175,7 @@ if __name__ == '__main__':
         sys.exit('Invalid depth argument.')
 
     print('Max Depth: %d' % depth)
-    matches = api.lookup_users(screen_name=[twitter_screenname][0])
+    matches = api.lookup_users(screen_name=twitter_screenname)
 
     if len(matches) == 1:
         print(get_follower_ids(matches[0].id, max_depth=depth))
