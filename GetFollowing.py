@@ -19,7 +19,7 @@ if not os.path.exists(USER_DIR):
     os.makedirs(USER_DIR)
     
 
-enc = lambda x: x.encode('ascii', errors='ignore')
+#enc = lambda x: x.encode('ascii', errors='ignore')
 
 # The consumer keys can be found on your application's Details
 # page located at https://dev.twitter.com/apps (under "OAuth settings")
@@ -103,14 +103,14 @@ def get_follower_ids(centre, max_depth=1, current_depth=0, taboo_list=[]):
         else:
             user = json.loads(open(userfname).read())
 
-        screen_name = enc(user['screen_name'])
+        screen_name = user['screen_name']
         fname = os.path.join(FOLLOWING_DIR, str(screen_name) + '.csv')
         friendids = []
 
         if not os.path.exists(fname):
             print('No cached data for screen name "%s"' % screen_name)
             with open(fname, 'w') as outf:
-                params = (enc(user['name']), screen_name)
+                params = (user['name'], screen_name)
                 print('Retrieving friends for user "%s" (%s)' % params)
 
                 # page over friends
@@ -121,7 +121,7 @@ def get_follower_ids(centre, max_depth=1, current_depth=0, taboo_list=[]):
                     try:
                         friend = c.next()
                         friendids.append(friend.id)
-                        params = (friend.id, enc(friend.screen_name), enc(friend.name))
+                        params = (friend.id, friend.screen_name, friend.name)
                         outf.write('%s\t%s\t%s\n' % params)
                         friend_count += 1
                         if friend_count >= MAX_FRIENDS:
