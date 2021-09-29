@@ -28,10 +28,10 @@ enc = lambda x: x.encode('ascii', errors='ignore')
 # page located at https://dev.twitter.com/apps (located
 # under "Your access token")
 
-CONSUMER_KEY    = ''
-CONSUMER_SECRET = ''
-ACCESS_TOKEN    = ''
-ACCESS_TOKEN_SECRET = ''
+CONSUMER_KEY    = 'BylRpnw4KkhQTlomNr569p8KY'
+CONSUMER_SECRET = 'slCQYK4gKhqBf6g434susM52LnJmOHBO5cAw9iKpEJyMSTeBhu'
+ACCESS_TOKEN    = '86434824-uGgWJGcpXv866pajtvx4us3xNGc46gwr9SP1xbc2a'
+ACCESS_TOKEN_SECRET = 'QsXxRUQ5L5g6EB6RzT3jFpo7371Jly6OzUXLAwXkOBmQ7'
 
 # == OAuth Authentication ==
 #
@@ -47,12 +47,12 @@ api = tweepy.API(auth)
 def get_follower_ids(centre, max_depth=1, current_depth=0, taboo_list=[]):
 
     if current_depth == max_depth:
-        print 'out of depth'
+        print('out of depth')
         return taboo_list
 
     if centre in taboo_list:
         # we've been here before
-        print 'Already been here.'
+        print('Already been here.')
         return taboo_list
     else:
         taboo_list.append(centre)
@@ -60,7 +60,7 @@ def get_follower_ids(centre, max_depth=1, current_depth=0, taboo_list=[]):
     try:
         userfname = os.path.join(USER_DIR, str(centre) + '.json')
         if not os.path.exists(userfname):
-            print 'Retrieving user details for twitter id %s' % str(centre)
+            print('Retrieving user details for twitter id %s' % str(centre))
             while True:
                 try:
                     user = api.get_user(centre)
@@ -79,39 +79,39 @@ def get_follower_ids(centre, max_depth=1, current_depth=0, taboo_list=[]):
 
                     user = d
                     break
-                except tweepy.TweepError, error:
-                    print type(error)
+                except tweepy.TweepError as error:
+                    print(type(error))
 
                     if str(error) == 'Not authorized.':
-                        print 'Can''t access user data - not authorized.'
+                        print('Can''t access user data - not authorized.')
                         return taboo_list
 
                     if str(error) == 'User has been suspended.':
-                        print 'User suspended.'
+                        print('User suspended.')
                         return taboo_list
 
                     errorObj = error[0][0]
 
-                    print errorObj
+                    print(errorObj)
 
                     if errorObj['message'] == 'Rate limit exceeded':
-                        print 'Rate limited. Sleeping for 15 minutes.'
+                        print('Rate limited. Sleeping for 15 minutes.')
                         time.sleep(15 * 60 + 15)
                         continue
 
                     return taboo_list
         else:
-            user = json.loads(file(userfname).read())
+            user = json.loads(open(userfname).read())
 
         screen_name = enc(user['screen_name'])
-        fname = os.path.join(FOLLOWING_DIR, screen_name + '.csv')
+        fname = os.path.join(FOLLOWING_DIR, str(screen_name) + '.csv')
         friendids = []
 
         if not os.path.exists(fname):
-            print 'No cached data for screen name "%s"' % screen_name
+            print('No cached data for screen name "%s"' % screen_name)
             with open(fname, 'w') as outf:
                 params = (enc(user['name']), screen_name)
-                print 'Retrieving friends for user "%s" (%s)' % params
+                print('Retrieving friends for user "%s" (%s)' % params)
 
                 # page over friends
                 c = tweepy.Cursor(api.friends, id=user['id']).items()
@@ -125,19 +125,19 @@ def get_follower_ids(centre, max_depth=1, current_depth=0, taboo_list=[]):
                         outf.write('%s\t%s\t%s\n' % params)
                         friend_count += 1
                         if friend_count >= MAX_FRIENDS:
-                            print 'Reached max no. of friends for "%s".' % friend.screen_name
+                            print('Reached max no. of friends for "%s".' % friend.screen_name)
                             break
                     except tweepy.TweepError:
                         # hit rate limit, sleep for 15 minutes
-                        print 'Rate limited. Sleeping for 15 minutes.'
+                        print('Rate limited. Sleeping for 15 minutes.')
                         time.sleep(15 * 60 + 15)
                         continue
                     except StopIteration:
                         break
         else:
-            friendids = [int(line.strip().split('\t')[0]) for line in file(fname)]
+            friendids = [int(line.strip().split('\t')[0]) for line in open(fname)]
 
-        print 'Found %d friends for %s' % (len(friendids), screen_name)
+        print('Found %d friends for %s' % (len(friendids), screen_name))
 
         # get friends of friends
         cd = current_depth
@@ -147,15 +147,15 @@ def get_follower_ids(centre, max_depth=1, current_depth=0, taboo_list=[]):
                     current_depth=cd+1, taboo_list=taboo_list)
 
         if cd+1 < max_depth and len(friendids) > FRIENDS_OF_FRIENDS_LIMIT:
-            print 'Not all friends retrieved for %s.' % screen_name
+            print('Not all friends retrieved for %s.' % screen_name)
 
-    except Exception, error:
-        print 'Error retrieving followers for user id: ', centre
-        print error
+    except Exception as error:
+        print('Error retrieving followers for user id: ', centre)
+        print(error)
 
         if os.path.exists(fname):
             os.remove(fname)
-            print 'Removed file "%s".' % fname
+            print('Removed file "%s".' % fname)
 
         sys.exit(1)
 
@@ -171,13 +171,13 @@ if __name__ == '__main__':
     depth = int(args['depth'])
 
     if depth < 1 or depth > 5:
-        print 'Depth value %d is not valid. Valid range is 1-5.' % depth
+        print('Depth value %d is not valid. Valid range is 1-5.' % depth)
         sys.exit('Invalid depth argument.')
 
-    print 'Max Depth: %d' % depth
-    matches = api.lookup_users(screen_names=[twitter_screenname])
+    print('Max Depth: %d' % depth)
+    matches = api.lookup_users(screen_name=[twitter_screenname][0])
 
     if len(matches) == 1:
-        print get_follower_ids(matches[0].id, max_depth=depth)
+        print(get_follower_ids(matches[0].id, max_depth=depth))
     else:
-        print 'Sorry, could not find twitter user with screen name: %s' % twitter_screenname
+        print('Sorry, could not find twitter user with screen name: %s' % twitter_screenname)
